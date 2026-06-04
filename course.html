@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Web Course — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0D0D0D;
+      --bg-1: #141414;
+      --bg-2: #1a1a1a;
+      --white: #f2f2f2;
+      --dim: rgba(242,242,242,0.35);
+      --mid: rgba(242,242,242,0.55);
+      --border: rgba(255,255,255,0.07);
+    }
+
+    * { font-family: 'Inter Tight', system-ui, sans-serif !important; }
+
+    body { background: var(--bg) !important; color: var(--white) !important; }
+
+    /* Questionnaire overlay */
+    #questionnaire-overlay { background: var(--bg) !important; }
+    #questionnaire-overlay h1, #questionnaire-overlay h2, #questionnaire-overlay p, #questionnaire-overlay label { color: var(--white) !important; }
+    #questionnaire-overlay input, #questionnaire-overlay textarea {
+      background: var(--bg-2) !important;
+      border-color: var(--border) !important;
+      color: var(--white) !important;
+    }
+    #questionnaire-overlay button[type="button"] {
+      background: var(--bg-2) !important;
+      border-color: var(--border) !important;
+      color: var(--white) !important;
+    }
+    #questionnaire-overlay .q-option-selected {
+      background: var(--white) !important;
+      color: var(--bg) !important;
+      border-color: var(--white) !important;
+    }
+
+    /* Nav */
+    nav.bg-white { background: var(--bg-1) !important; border-color: var(--border) !important; }
+    nav a, nav span, nav button, nav div { color: var(--white) !important; }
+    .bg-gray-100 { background: var(--bg-2) !important; }
+    .text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400 { color: var(--mid) !important; }
+    .border-gray-100, .border-gray-200 { border-color: var(--border) !important; }
+
+    /* Sidebar */
+    aside.bg-white { background: var(--bg-1) !important; border-color: var(--border) !important; }
+    .lesson-item { border-color: var(--border) !important; }
+    .lesson-item:hover { background: var(--bg-2) !important; }
+    .lesson-item.active { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.15) !important; }
+    .lesson-item.active .lesson-title { color: var(--white) !important; }
+    .module-title { color: var(--mid) !important; }
+
+    /* Main content */
+    .bg-gray-50 { background: var(--bg) !important; }
+    main, .flex-1 { background: var(--bg) !important; }
+    h1, h2, h3, h4, h5 { color: var(--white) !important; }
+    p, li, span { color: var(--dim) !important; }
+    strong { color: var(--white) !important; }
+
+    /* Progress bar */
+    .bg-gray-200 { background: var(--bg-2) !important; }
+    .gradient-bg { background: var(--white) !important; }
+
+    /* Force all remaining white backgrounds dark */
+    [style*="background:#fff"], [style*="background: #fff"],
+    [style*="background:#f8fafc"], [style*="background: #f8fafc"],
+    [style*="background:#f4f4f5"], [style*="background: #f4f4f5"],
+    [style*="background:#fafaf9"], [style*="background: #fafaf9"],
+    [style*="background:white"], [style*="background: white"] {
+      background: var(--bg-2) !important;
+    }
+    [style*="color:#0f172a"], [style*="color: #0f172a"],
+    [style*="color:#18181b"], [style*="color: #18181b"] {
+      color: var(--white) !important;
+    }
+    [style*="border.*#e2e8f0"], [style*="border-color:#e2e8f0"] {
+      border-color: var(--border) !important;
+    }
+    /* Lesson intro card */
+    .prose, [class*="prose"], .bg-blue-50, .bg-indigo-50, .bg-amber-50,
+    [style*="background:#eff6ff"], [style*="background:#eef2ff"] {
+      background: var(--bg-2) !important;
+      color: var(--white) !important;
+      border-color: var(--border) !important;
+    }
+    /* Bottom left user card */
+    .rounded-xl.bg-white, div.bg-white { background: var(--bg-2) !important; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    #sidebar { width: 300px; min-width: 300px; }
+    .module-group.collapsed .lesson-list { display: none; }
+    .video-wrap { max-width: 800px; margin: 0 auto; width: 100%; }
+    .video-container { position: relative; padding-bottom: 62.5%; height: 0; overflow: hidden; border-radius: 8px; background: #111; }
+    .video-container iframe { position: absolute; top:0; left:0; width:100%; height:100%; border: none; }
+
+    @media (max-width: 768px) {
+      #sidebar { display: none; width: 0; min-width: 0; }
+      #sidebar.mobile-open { display: flex; position: fixed; inset-y-0; left: 0; z-index: 50; width: 300px; min-width: 300px; }
+    }
+  </style>
+</head>
+<body class="font-sans h-screen flex flex-col overflow-hidden" style="background:#0D0D0D;color:#f2f2f2;">
+
+<!-- ── Questionnaire overlay ─────────────────────────────────── -->
+<div id="questionnaire-overlay" style="display:none;position:fixed;inset:0;background:#0D0D0D;z-index:200;overflow-y:auto;align-items:flex-start;justify-content:center;padding:40px 20px">
+  <div style="max-width:560px;width:100%;margin:0 auto">
+    <!-- Logo -->
+    <p style="font-weight:900;font-size:18px;margin-bottom:40px;color:#0f172a">AI<span style="color:#18181b">Web</span>Course</p>
+
+    <!-- Welcome screen -->
+    <div id="q-welcome">
+      <h1 style="color:#f2f2f2;font-size:32px;font-weight:700;line-height:1.1;margin-bottom:12px;letter-spacing:-0.02em;">Before you dive in —<br/>let us personalise this for you</h1>
+      <p style="color:rgba(242,242,242,0.45);font-size:15px;line-height:1.7;margin-bottom:12px">Everyone starts somewhere different. Answer 8 quick questions and we'll tailor the course to your level, goals, and situation.</p>
+      <p style="color:rgba(242,242,242,0.25);font-size:13px;margin-bottom:36px">Takes under 2 minutes.</p>
+      <button onclick="document.getElementById('q-welcome').style.display='none';document.getElementById('q-form').style.display='block';" style="width:100%;background:#18181b;color:white;font-weight:800;font-size:16px;padding:16px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;margin-bottom:12px">
+        Personalise my course →
+      </button>
+      <p style="text-align:center;color:#94a3b8;font-size:12px;cursor:pointer" onclick="localStorage.setItem('quiz_done','skipped');document.getElementById('questionnaire-overlay').style.display='none'">Skip — take me straight to the course</p>
+    </div>
+
+    <!-- Form -->
+    <div id="q-form" style="display:none">
+      <h1 style="color:#0f172a;font-size:32px;font-weight:800;line-height:1.15;margin-bottom:8px">Let's personalise<br/>your course</h1>
+      <p style="color:#64748b;font-size:15px;margin-bottom:40px">8 quick questions. Takes under 2 minutes. We use your answers to tailor everything.</p>
+
+      <div id="q-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:20px">Please answer all questions to continue.</div>
+
+      <!-- Q1: Main goal -->
+      <div style="margin-bottom:28px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">What's your main goal for taking this course?</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">This shapes the examples and framing throughout every module.</p>
+        <textarea id="q-goal" placeholder="e.g. Get a better job, build my own thing, stop feeling behind on AI..." rows="2" style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;color:#0f172a;padding:14px 16px;border-radius:10px;font-size:15px;outline:none;resize:none;font-family:inherit" onfocus="this.style.borderColor='#18181b'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+      </div>
+
+      <!-- Q2: AI Level -->
+      <div style="margin-bottom:32px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">How would you rate your AI knowledge? (1–5)</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:14px">1 = heard the term, 5 = I've built something with it. Determines your Module 1.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" id="level-beginner" onclick="selectLevel('beginner')" style="flex:1;min-width:80px;padding:12px 8px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s">
+            <div style="font-weight:700;font-size:18px;color:#0f172a">1–2</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Beginner</div>
+          </button>
+          <button type="button" id="level-intermediate" onclick="selectLevel('intermediate')" style="flex:1;min-width:80px;padding:12px 8px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s">
+            <div style="font-weight:700;font-size:18px;color:#0f172a">3</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Some experience</div>
+          </button>
+          <button type="button" id="level-advanced" onclick="selectLevel('advanced')" style="flex:1;min-width:80px;padding:12px 8px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s">
+            <div style="font-weight:700;font-size:18px;color:#0f172a">4–5</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Advanced</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Q3: Day to day -->
+      <div style="margin-bottom:28px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">What do you do day-to-day?</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">Determines which real-world examples we use to explain things.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="role-buttons">
+          <button type="button" onclick="selectRole(this,'student')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Student</button>
+          <button type="button" onclick="selectRole(this,'freelancer')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Freelancer</button>
+          <button type="button" onclick="selectRole(this,'employed')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Employed</button>
+          <button type="button" onclick="selectRole(this,'building')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Building something</button>
+          <button type="button" onclick="selectRole(this,'other')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Other</button>
+        </div>
+        <input type="hidden" id="q-role" value=""/>
+      </div>
+
+      <!-- Q4: Specific outcome -->
+      <div style="margin-bottom:28px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">What's the ONE thing you want to be able to do by the end?</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">Be specific. "Build my own AI tool" beats "get better at AI."</p>
+        <textarea id="q-outcome" placeholder="By the end of this course I want to be able to..." rows="2" style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;color:#0f172a;padding:14px 16px;border-radius:10px;font-size:15px;outline:none;resize:none;font-family:inherit" onfocus="this.style.borderColor='#18181b'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+      </div>
+
+      <!-- Q5: Worries -->
+      <div style="margin-bottom:28px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">What worries you most about this?</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">Honest answer. We use this to address it head-on in the first week.</p>
+        <textarea id="q-worry" placeholder="e.g. I'm not technical enough, I'll start and not finish, it'll be outdated..." rows="2" style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;color:#0f172a;padding:14px 16px;border-radius:10px;font-size:15px;outline:none;resize:none;font-family:inherit" onfocus="this.style.borderColor='#18181b'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+      </div>
+
+      <!-- Q6: Hours per week -->
+      <div style="margin-bottom:28px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">How many hours a week can you realistically commit?</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">Helps us pace the course to your actual life.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="hours-buttons">
+          <button type="button" onclick="selectHours(this,'under1')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Under 1 hr</button>
+          <button type="button" onclick="selectHours(this,'1to2')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">1–2 hrs</button>
+          <button type="button" onclick="selectHours(this,'3to5')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">3–5 hrs</button>
+          <button type="button" onclick="selectHours(this,'5plus')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">5+ hrs</button>
+        </div>
+        <input type="hidden" id="q-hours" value=""/>
+      </div>
+
+      <!-- Q7: Prior experience -->
+      <div style="margin-bottom:28px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">Have you tried to learn AI before? What got in the way?</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">If not, just say no. If yes, tell us what stopped you.</p>
+        <textarea id="q-prior" placeholder="e.g. Yes, tried another course but it assumed I knew how to code..." rows="2" style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;color:#0f172a;padding:14px 16px;border-radius:10px;font-size:15px;outline:none;resize:none;font-family:inherit" onfocus="this.style.borderColor='#18181b'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+      </div>
+
+      <!-- Q8: Tools -->
+      <div style="margin-bottom:36px">
+        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">Which tools do you use day-to-day?</label>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">Select all that apply.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="tools-buttons">
+          <button type="button" onclick="toggleTool(this,'excel')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Excel / Sheets</button>
+          <button type="button" onclick="toggleTool(this,'notion')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Notion</button>
+          <button type="button" onclick="toggleTool(this,'canva')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Canva</button>
+          <button type="button" onclick="toggleTool(this,'social')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Social scheduling</button>
+          <button type="button" onclick="toggleTool(this,'code')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Code / Python</button>
+          <button type="button" onclick="toggleTool(this,'none')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">None of these</button>
+        </div>
+        <input type="hidden" id="q-tools" value=""/>
+      </div>
+
+      <button onclick="submitQuestionnaire()" style="width:100%;background:#18181b;color:white;font-weight:800;font-size:17px;padding:16px;border-radius:12px;border:none;cursor:pointer;font-family:inherit">
+        Show me my personalised path →
+      </button>
+    </div>
+
+    <!-- Result screen -->
+    <div id="q-result" style="display:none">
+      <h2 style="color:#f2f2f2;font-size:26px;font-weight:700;margin-bottom:16px;letter-spacing:-0.02em;">Your personalised path</h2>
+      <div id="q-result-text" style="color:#475569;font-size:15px;line-height:1.75;margin-bottom:32px"></div>
+      <button onclick="enterCourse()" style="width:100%;background:#18181b;color:white;font-weight:800;font-size:17px;padding:16px;border-radius:12px;border:none;cursor:pointer;font-family:inherit">
+        Start my course →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Auth gate overlay ─────────────────────────────────────── -->
+<div id="auth-gate" class="fixed inset-0 bg-gray-50 z-50 flex items-center justify-center">
+  <div class="text-center">
+    <div class="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style="border-color:#18181b;border-top-color:transparent"></div>
+    <p class="text-gray-400 text-sm">Checking your access...</p>
+  </div>
+</div>
+
+<!-- ── Top navbar ────────────────────────────────────────────── -->
+<nav class="bg-white border-b border-gray-100 flex items-center px-4 md:px-6 h-14 flex-shrink-0 z-40">
+  <button id="sidebar-toggle" class="md:hidden mr-3 p-2 rounded-lg hover:bg-gray-100" onclick="toggleSidebar()">
+    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+  <a href="sales.html" class="font-black text-lg tracking-tight mr-auto" style="color:#f2f2f2;letter-spacing:-0.03em;">Jude Bolton</a>
+  <div class="flex items-center gap-3">
+    <!-- Progress badge -->
+    <div class="hidden md:flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full text-xs font-medium text-gray-500">
+      <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div id="progress-bar" class="h-full gradient-bg rounded-full transition-all" style="width:0%"></div>
+      </div>
+      <span id="progress-text">0% complete</span>
+    </div>
+    <button onclick="signOut()" class="text-xs text-gray-400 hover:text-gray-700 transition-colors font-medium">Sign out</button>
+  </div>
+</nav>
+
+<!-- ── Main layout ───────────────────────────────────────────── -->
+<div class="flex flex-1 overflow-hidden">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────── -->
+  <aside id="sidebar" class="bg-white border-r border-gray-100 flex flex-col overflow-hidden">
+
+    <!-- Sidebar header -->
+    <div class="px-5 py-4 border-b border-gray-100">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Course Content</p>
+    </div>
+
+    <!-- Module list -->
+    <nav class="flex-1 overflow-y-auto py-3 px-3" id="module-nav">
+      <!-- Injected by JS -->
+    </nav>
+
+    <!-- Sidebar footer -->
+    <div class="p-4 border-t border-gray-100 space-y-3">
+      <!-- Retake questionnaire -->
+      <button onclick="retakeQuestionnaire()" class="w-full text-xs font-semibold text-gray-500 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 rounded-xl px-4 py-3 transition-colors text-left flex items-center gap-2">
+        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Redo questionnaire
+      </button>
+      <div class="rounded-xl p-4 border" style="background:#f4f4f5;border-color:#e4e4e7">
+        <p class="text-xs font-semibold text-gray-700 mb-1">Need help?</p>
+        <p class="text-xs text-gray-500 mb-3">Email us and we'll get back within 24h.</p>
+        <a href="mailto:jude@aiwebcourse.com" class="text-xs font-semibold hover:underline" style="color:#18181b">jude@aiwebcourse.com</a>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Mobile sidebar overlay -->
+  <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/40 z-40 md:hidden" onclick="toggleSidebar()"></div>
+
+  <!-- ── Content area ──────────────────────────────────────────── -->
+  <main class="flex-1 overflow-y-auto" id="main-content">
+
+    <!-- Loading state -->
+    <div id="content-loading" class="flex items-center justify-center h-full">
+      <div class="text-center">
+        <div class="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style="border-color:#18181b;border-top-color:transparent"></div>
+        <p class="text-gray-400 text-sm">Loading lesson...</p>
+      </div>
+    </div>
+
+    <!-- Lesson content (hidden until loaded) -->
+    <div id="lesson-view" class="hidden max-w-4xl mx-auto px-6 py-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+        <span id="bc-module">Module 1</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span id="bc-lesson" class="text-gray-600 font-medium">Introduction</span>
+      </div>
+
+      <!-- Personalised banner -->
+      <div id="personalised-banner" style="display:none;background:#f2f2f2;border-radius:12px;padding:20px 24px;margin-bottom:28px;color:#0D0D0D;font-size:13px;line-height:1.8;font-family:'Inter Tight',sans-serif;"></div>
+
+      <!-- Lesson header -->
+      <h1 id="lesson-title" class="text-2xl md:text-3xl font-bold text-gray-900 mb-2"></h1>
+      <p id="lesson-meta" class="text-sm text-gray-400 mb-8"></p>
+
+      <!-- Video embed -->
+      <div id="video-section" class="hidden mb-8">
+        <div class="video-wrap">
+          <div class="video-container">
+            <iframe id="video-iframe" src="" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="autoplay; fullscreen" frameborder="0" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video placeholder (no URL yet) -->
+      <div id="video-placeholder" class="hidden mb-8">
+        <div class="video-wrap">
+          <div class="video-container flex flex-col items-center justify-center" style="border: 2px dashed #374151;">
+            <svg class="w-12 h-12 mb-3" style="color:#4B5563" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <p class="text-sm font-semibold" style="color:#6B7280">Video coming soon</p>
+            <p class="text-xs mt-1" style="color:#4B5563">This lesson will be available shortly</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lesson body text -->
+      <div id="lesson-body" class="prose prose-gray max-w-none mb-8 text-gray-600 leading-relaxed text-sm md:text-base"></div>
+
+      <!-- Downloads -->
+      <div id="downloads-section" class="hidden mb-8">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5" style="color:#18181b" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Downloads
+        </h3>
+        <div id="downloads-list" class="grid gap-3"></div>
+      </div>
+
+      <!-- Mark complete + navigation -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-100 mt-8">
+        <button id="btn-prev" onclick="navigateLesson(-1)"
+          class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-30">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          Previous
+        </button>
+        <button id="btn-complete" onclick="markComplete()"
+          class="flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl hover:opacity-90 transition" style="background:#18181b">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <span id="btn-complete-text">Mark complete &amp; continue</span>
+        </button>
+        <button id="btn-next" onclick="navigateLesson(1)"
+          class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-gray-700 transition-colors">
+          Next
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Scripts -->
+<script>
+// ─────────────────────────────────────────────────────────────
+//  COURSE DATA
+//  Replace video_url values with your actual Vimeo/YouTube
+//  embed URLs. Replace download hrefs with Supabase Storage
+//  signed URLs or direct file paths.
+// ─────────────────────────────────────────────────────────────
+(function() {
+  const VALID_TOKEN = 'BUILDWITHAISECRET2024';
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const stored = localStorage.getItem('course_token');
+  if (token === VALID_TOKEN) {
+    localStorage.setItem('course_token', VALID_TOKEN);
+    // Fresh login via token — always reset questionnaire so it shows
+    localStorage.removeItem('quiz_done');
+    localStorage.removeItem('quiz_message');
+    localStorage.removeItem('ai_level');
+  }
+  // ?reset clears all state so questionnaire + progress resets (for testing)
+  if (params.get('reset') === '1') {
+    localStorage.removeItem('quiz_done');
+    localStorage.removeItem('quiz_message');
+    localStorage.removeItem('completed');
+    localStorage.removeItem('ai_level');
+  }
+})();
+
+// Module 1 has 3 variants — loaded dynamically based on ai_level after DOM ready
+const MODULE1_VARIANTS = {
+  beginner: [
+    {
+      id: 101, title: 'What AI-assisted building actually looks like', duration: '12 min',
+      video_url: '',
+      body: `<h2>Welcome — You're in the Right Place</h2>
+<p>You told us you're new to AI tools. That's completely fine — this module is built for you. By the end of it you'll understand what all the tools in this course do, why they work so well together, and what "AI-assisted building" actually means in practice (it's not what most people think).</p>
+<h3>What we'll cover in this module</h3>
+<ul>
+  <li>The mental model that makes everything click</li>
+  <li>A plain-English tour of every tool in the course</li>
+  <li>Setting up your workspace — step by step, no jargon</li>
+  <li>Your first output in under 5 minutes</li>
+</ul>`,
+      downloads: []
+    },
+    {
+      id: 102, title: 'A plain-English tour of every tool', duration: '15 min',
+      video_url: '',
+      body: `<h2>The Tools — What They Are and When to Use Them</h2>
+<p>This course covers 6 tools: <strong>Gamma, Claude Artifacts, Claude Code, Cowork, Lovable, and Manus.</strong> Each one does something different. You don't need to use all of them — you need to know which one to reach for on which kind of task.</p>
+<h3>Quick reference</h3>
+<ul>
+  <li><strong>Gamma</strong> — Makes polished slide decks and documents from a prompt</li>
+  <li><strong>Artifacts</strong> — Instant prototypes: calculators, widgets, mini pages</li>
+  <li><strong>Claude Code</strong> — Writes and edits real code for full projects</li>
+  <li><strong>Cowork</strong> — Your AI thinking partner for planning and writing</li>
+  <li><strong>Lovable</strong> — Builds full web apps from a description</li>
+  <li><strong>Manus</strong> — Autonomous agent that executes multi-step tasks</li>
+</ul>`,
+      downloads: [{ label: '📄 Quick-Start Checklist (PDF)', href: '#' }]
+    },
+    {
+      id: 103, title: 'Setting up your workspace and your first prompt', duration: '20 min',
+      video_url: '',
+      body: `<h2>Getting Set Up — No Experience Needed</h2>
+<p>You need four things: a Claude account, a Gamma account, a Lovable account, and a browser. That's it. The video above walks through creating each one, and the checklist below lists every step.</p>
+<p>At the end of this lesson you'll run your first prompt and get your first output. That moment — when it works the first time — is what this whole course is building toward.</p>`,
+      downloads: [{ label: '📄 Setup Checklist (PDF)', href: '#' }]
+    },
+  ],
+  intermediate: [
+    {
+      id: 101, title: 'Where you already are — and where this course takes you', duration: '10 min',
+      video_url: '',
+      body: `<h2>You Know the Basics — Here's What's Next</h2>
+<p>You've used AI tools before. You know roughly what they can do. This course is going to take you from "using AI" to "working with AI" — and the difference is bigger than it sounds.</p>
+<p>The gap between people who get average results from AI and people who get exceptional results is almost never about intelligence or experience. It's about the briefing: how you structure what you ask, when you iterate, and how you know when the output is actually good.</p>
+<h3>What this module covers for you</h3>
+<ul>
+  <li>The briefing framework — why most people get mediocre AI output</li>
+  <li>Fast setup for any tools you haven't used yet</li>
+  <li>Your first build using the full workflow</li>
+</ul>`,
+      downloads: []
+    },
+    {
+      id: 102, title: "Filling the gaps — tools you haven't used yet", duration: '14 min',
+      video_url: '',
+      body: `<h2>A Focused Setup Session</h2>
+<p>Based on where you are, there are probably 1–2 tools in this course you haven't set up. This lesson walks through each one — Gamma, Artifacts, Claude Code, Cowork, Lovable, and Manus — and lets you skip the ones you know.</p>
+<p>If you're already familiar with a tool, skip ahead. The goal is to start Module 2 with everything ready.</p>`,
+      downloads: [{ label: '📄 Quick-Start Checklist (PDF)', href: '#' }]
+    },
+    {
+      id: 103, title: 'Your first build using the full workflow', duration: '18 min',
+      video_url: '',
+      body: `<h2>From Brief to Output in One Session</h2>
+<p>Let's put the tools to work immediately. In this lesson you'll pick a real task — a page, a deck, a tool — and build it using the end-to-end workflow this course teaches. You'll probably find that the output is better than what you'd normally get.</p>
+<p>That's the point. We'll analyse why, and that analysis becomes the foundation for everything in Module 2.</p>`,
+      downloads: []
+    },
+  ],
+  advanced: [
+    {
+      id: 101, title: 'The gap between advanced users and power users', duration: '8 min',
+      video_url: '',
+      body: `<h2>You're Advanced — Here's What Separates You from the Top 1%</h2>
+<p>If you're already confident with AI tools, this module is not a setup guide — it's a recalibration. The most common mistake advanced users make is optimising for speed when they should be optimising for quality. This lesson explains the distinction and sets up the framework for the whole course.</p>
+<h3>The three things that separate power users</h3>
+<ol>
+  <li><strong>Partnership over prompting</strong> — they treat AI as a collaborator, not a generator</li>
+  <li><strong>Context density</strong> — they give AI enough background to make real judgment calls</li>
+  <li><strong>Iteration discipline</strong> — they know when to push back, not just accept</li>
+</ol>`,
+      downloads: []
+    },
+    {
+      id: 102, title: 'Quick configuration — advanced settings for every tool', duration: '12 min',
+      video_url: '',
+      body: `<h2>Unlocking the Full Capability of Each Tool</h2>
+<p>Most people use 30% of what these tools can do. This lesson is a fast walkthrough of the advanced settings, API access, and custom configurations that most users never discover — specifically for Gamma, Claude Code, Lovable, and Manus.</p>`,
+      downloads: [{ label: '📄 Advanced Config Guide (PDF)', href: '#' }]
+    },
+    {
+      id: 103, title: 'Build something ambitious — right now', duration: '15 min',
+      video_url: '',
+      body: `<h2>Start With the Hard Thing</h2>
+<p>Advanced students learn best by tackling something they'd normally find difficult and noticing what breaks down. Pick your hardest upcoming project — a complex app, a multi-section deck, an automated workflow — and start it in this lesson.</p>
+<p>The rest of the course teaches you to finish it better than you would have before.</p>`,
+      downloads: []
+    },
+  ]
+};
+
+const COURSE = [
+  {
+    id: 1, title: 'AI Setup', icon: '',
+    lessons: [] // populated at init based on ai_level
+  },
+  {
+    id: 2, title: 'Partnership', icon: '',
+    lessons: [
+      {
+        id: 201, title: 'Why "using AI" is not the same as partnering with it', duration: '15 min',
+        video_url: '',
+        body: `<h2>The Partnership Mindset</h2>
+<p>Most people who are "using AI" are actually just using a very fast autocomplete. They get a result, accept it, move on. They're not getting anywhere near the real capability of these tools — and the gap is not about prompting skills. It's about mindset.</p>
+<p>Partnering with AI means treating it as a collaborator that has context, judgment, and preferences. When you do that, the output quality goes up by an order of magnitude.</p>
+<h3>The three shifts</h3>
+<ol>
+  <li><strong>From task to brief</strong> — stop asking for things, start briefing for outcomes</li>
+  <li><strong>From accept to iterate</strong> — the first output is a draft, not a deliverable</li>
+  <li><strong>From tool to colleague</strong> — give it the context a colleague would need</li>
+</ol>`,
+        downloads: []
+      },
+      {
+        id: 202, title: 'The briefing framework — how to get consistently great output', duration: '20 min',
+        video_url: '',
+        body: `<h2>The Briefing Framework</h2>
+<p>This is the core skill the whole course is built on. The quality of what you get from any AI tool is almost entirely determined by the quality of what you put in. This lesson teaches you a four-part briefing structure that works across every tool in this course.</p>
+<h3>The 4-Part Brief</h3>
+<ol>
+  <li><strong>Context</strong> — What is this for? Who is the audience? What's the surrounding situation?</li>
+  <li><strong>Objective</strong> — What specific outcome do you need? Not what to build — what it needs to achieve.</li>
+  <li><strong>Constraints</strong> — What must it include? What must it avoid? What format should it take?</li>
+  <li><strong>Standard</strong> — What does "good" look like here? Give an example if you can.</li>
+</ol>
+<p>The download below contains the full framework as a one-page reference card.</p>`,
+        downloads: [{ label: '📄 AI Briefing Framework (PDF)', href: '#' }]
+      },
+      {
+        id: 203, title: 'Building templates that get consistent results every time', duration: '18 min',
+        video_url: '',
+        body: `<h2>Repeatability — the Secret to Professional Output</h2>
+<p>One-off great results are luck. Repeatable great results are skill. This lesson is about building the prompt templates that produce excellent output consistently — across different tasks, different tools, and different days.</p>
+<h3>What we'll build together</h3>
+<ul>
+  <li>A personal prompt template for web builds</li>
+  <li>A debugging brief template</li>
+  <li>A client brief → AI brief translation template</li>
+</ul>`,
+        downloads: []
+      },
+      {
+        id: 204, title: 'Live demo — the briefing framework on a real project', duration: '22 min',
+        video_url: '',
+        body: `<h2>Seeing It in Action</h2>
+<p>The best way to understand this framework is to watch it applied to a real project from scratch. In this lesson we take a client brief — a landing page for a fitness coach — and work through it step by step.</p>
+<p>We'll compare the output from a vague prompt versus a properly structured brief. The difference is immediately obvious.</p>`,
+        downloads: []
+      },
+    ]
+  },
+  {
+    id: 3, title: 'Gamma', icon: '',
+    lessons: [
+      {
+        id: 301, title: 'Gamma overview — decks and documents in minutes', duration: '14 min',
+        video_url: '',
+        body: `<h2>What Gamma Does (and When to Use It)</h2>
+<p>Gamma generates polished slide decks, documents, and one-pagers from a prompt. It's not just a template tool — it reasons about structure, hierarchy, and layout to produce output that actually looks designed.</p>
+<p>You'll use Gamma when you need to present or document something: client proposals, pitch decks, course materials, onboarding docs, reports.</p>`,
+        downloads: []
+      },
+      {
+        id: 302, title: 'Building a client proposal deck from a one-line brief', duration: '25 min',
+        video_url: '',
+        body: `<h2>Brief → Deck → Client-Ready</h2>
+<p>In this lesson we build a complete client proposal — 12 slides, branded, with a cover, problem statement, solution, timeline, and pricing page — from a single sentence. Then we customise the brand, adjust the layout, and export it.</p>
+<p>By the end of this lesson you can replicate this for any client in under 20 minutes.</p>`,
+        downloads: []
+      },
+      {
+        id: 303, title: 'Customising brand, layout, and exporting for clients', duration: '16 min',
+        video_url: '',
+        body: `<h2>Making It Yours</h2>
+<p>Gamma's default output is clean but generic. This lesson covers the specific customisations that make it look like your work — custom colour palettes, typefaces, image replacement, and the export formats clients actually want (PDF, PowerPoint, web link).</p>`,
+        downloads: [{ label: '📄 Gamma Prompt Templates (PDF)', href: '#' }]
+      },
+    ]
+  },
+  {
+    id: 4, title: 'Artifacts', icon: '',
+    lessons: [
+      {
+        id: 401, title: 'What Claude Artifacts are and why they matter', duration: '12 min',
+        video_url: '',
+        body: `<h2>Instant Prototypes</h2>
+<p>Claude Artifacts are self-contained pieces of code — HTML pages, React components, calculators, tools — that Claude builds and renders in real time inside the chat interface. No setup, no deployment, no terminal. Just describe what you want and watch it appear.</p>
+<p>Artifacts are the fastest way to test an idea, prototype a feature, or build a standalone tool that you can immediately share with a client.</p>`,
+        downloads: []
+      },
+      {
+        id: 402, title: 'Building calculators, widgets, and landing pages', duration: '20 min',
+        video_url: '',
+        body: `<h2>What You Can Build in One Prompt</h2>
+<p>In this lesson we build three things that would normally take hours: a mortgage calculator, an interactive quiz widget, and a complete single-page landing page — all directly in Claude, all in minutes.</p>
+<p>These are real deliverables you could send to a client today.</p>`,
+        downloads: []
+      },
+      {
+        id: 403, title: 'When to use Artifacts vs. Claude Code vs. Lovable', duration: '14 min',
+        video_url: '',
+        body: `<h2>Choosing the Right Tool</h2>
+<p>Artifacts, Claude Code, and Lovable all build things — but they're for different situations. Using the wrong tool wastes time and produces worse results. This lesson gives you a clear decision framework.</p>
+<ul>
+  <li><strong>Artifacts</strong> — quick, standalone, shareable immediately. Use for prototypes, tools, and demos.</li>
+  <li><strong>Claude Code</strong> — full project control, integrations, existing codebases. Use for production builds.</li>
+  <li><strong>Lovable</strong> — visual full-stack apps with a database. Use for SaaS products and web apps.</li>
+</ul>`,
+        downloads: []
+      },
+    ]
+  },
+  {
+    id: 5, title: 'Claude Code', icon: '',
+    lessons: [
+      {
+        id: 501, title: 'Claude Code setup and your first real project', duration: '28 min',
+        video_url: 'https://www.loom.com/embed/cc73ad671f1c42e496ba890346a86ec4',
+        body: `<h2>Getting Started with Claude Code</h2>
+<p>Claude Code is Anthropic's official CLI — a terminal-based AI assistant that can read your entire codebase, run commands, edit files, and ship working code with a degree of judgment that makes it feel like a pairing session with a senior developer.</p>
+<h3>Installation</h3>
+<pre><code>npm install -g @anthropic-ai/claude-code
+claude</code></pre>
+<p>That's it. The video above walks through the entire setup and your first project from scratch.</p>`,
+        downloads: [{ label: '📄 Claude Code Setup Guide (PDF)', href: '#' }]
+      },
+      {
+        id: 502, title: 'Treating Claude like a senior dev — how to communicate in code', duration: '20 min',
+        video_url: '',
+        body: `<h2>How to Brief Claude Code</h2>
+<p>The biggest mistake beginners make is treating Claude like a search engine. The better mental model is a contractor briefing: context, constraints, desired outcome.</p>
+<h3>The briefing template</h3>
+<blockquote>
+  <strong>Context:</strong> "This is a Next.js e-commerce site for a local bakery."<br/>
+  <strong>Constraint:</strong> "We're using Tailwind CSS and have a Stripe integration already in place."<br/>
+  <strong>Outcome:</strong> "Add a product grid to the homepage that fetches from our Supabase products table."
+</blockquote>
+<p>That three-part structure produces dramatically better output than "make a product grid."</p>`,
+        downloads: []
+      },
+      {
+        id: 503, title: 'Debugging errors without knowing how to code', duration: '16 min',
+        video_url: '',
+        body: `<h2>The Error Loop</h2>
+<p>Every developer hits errors. The difference with Claude Code is you don't have to solve them alone. Paste the error, describe what you expected, and let Claude diagnose and fix it — and explain what went wrong so you learn from every fix.</p>`,
+        downloads: []
+      },
+      {
+        id: 504, title: 'Deploy to the web — Netlify, Vercel, and custom domains', duration: '24 min',
+        video_url: '',
+        body: `<h2>From Localhost to Live</h2>
+<p>We'll cover the three deployment options that matter: Netlify (simplest), Vercel (best for Next.js), and GitHub Pages (free, for static sites). Plus: connecting a custom domain and handing the project over to a client.</p>`,
+        downloads: [{ label: '📄 Deployment Cheatsheet (PDF)', href: '#' }]
+      },
+      {
+        id: 505, title: 'Working with existing codebases and client handover', duration: '19 min',
+        video_url: '',
+        body: `<h2>Editing What Already Exists</h2>
+<p>Most real work is editing, not building from scratch. Claude Code can read your entire project, understand the patterns, and make changes that fit. This lesson also covers the professional handover — domain DNS setup, access delegation, and the client handover doc.</p>`,
+        downloads: []
+      },
+    ]
+  },
+  {
+    id: 6, title: 'Cowork', icon: '',
+    lessons: [
+      {
+        id: 601, title: 'How professionals use AI every single day', duration: '14 min',
+        video_url: '',
+        body: `<h2>The Daily Working Rhythm</h2>
+<p>The people getting the most out of AI aren't using it for one-off tasks. They've built it into their daily rhythm — every piece of writing, every research task, every client communication has an AI layer. This lesson shows you what that actually looks like in practice.</p>`,
+        downloads: []
+      },
+      {
+        id: 602, title: 'Writing, research, strategy, and client comms — all AI-assisted', duration: '20 min',
+        video_url: '',
+        body: `<h2>AI Across Every Part of Your Work</h2>
+<p>In this lesson we run through real examples: drafting a client update email, researching a competitor's positioning, writing a project strategy doc, and planning a product roadmap. All of it done with AI as the first draft engine and you as the editor and director.</p>
+<p>By the end you'll have templates for all four that you can use immediately.</p>`,
+        downloads: [{ label: '📄 AI Workflow Templates (PDF)', href: '#' }]
+      },
+      {
+        id: 603, title: 'Custom workflows that save 10+ hours a week', duration: '18 min',
+        video_url: '',
+        body: `<h2>Building Your Personal AI System</h2>
+<p>The biggest efficiency gains come from systematising your most repetitive tasks. This lesson shows you how to identify those tasks and build a reusable AI workflow for each one — so every time you do it, you start from a better place than last time.</p>`,
+        downloads: []
+      },
+    ]
+  },
+  {
+    id: 7, title: 'Lovable', icon: '',
+    lessons: [
+      {
+        id: 701, title: 'Lovable deep-dive — build a complete app from one line', duration: '20 min',
+        video_url: 'https://www.loom.com/embed/769c57f65d6f4577a0c0710dac66825b',
+        body: `<h2>Mastering Lovable</h2>
+<p>Lovable generates entire full-stack web applications from natural language prompts. It handles the frontend, backend, and database — and it's the fastest way to go from idea to working product. In this lesson we tour every feature that matters for professional projects.</p>`,
+        downloads: []
+      },
+      {
+        id: 702, title: 'Building a complete web app from a one-line brief', duration: '35 min',
+        video_url: '',
+        body: `<h2>Full App in One Session</h2>
+<p>We take a single sentence — <em>"A booking system for a personal trainer with client management and payment collection"</em> — and build the complete application. You'll see how much you can direct the output by adjusting your brief, and how to fix the rough edges AI tools always produce.</p>`,
+        downloads: []
+      },
+      {
+        id: 703, title: 'Custom design — brand, fonts, layout with no design skills', duration: '18 min',
+        video_url: '',
+        body: `<h2>Making It Look Designed</h2>
+<p>AI-generated UIs have a recognisable look. This lesson covers the specific techniques that make your output look intentional — custom typography, brand-coherent colour palettes, and the layout decisions that separate professional from amateur.</p>`,
+        downloads: []
+      },
+      {
+        id: 704, title: 'Connecting Supabase, forms, analytics, and payments', duration: '22 min',
+        video_url: '',
+        body: `<h2>Real-World Integrations</h2>
+<p>A beautiful app that doesn't work in production isn't a deliverable. This lesson covers Supabase for data, Resend for email, Stripe for payments, and analytics — all connected to your Lovable project.</p>`,
+        downloads: []
+      },
+      {
+        id: 705, title: 'Shipping and selling your first client project', duration: '15 min',
+        video_url: '',
+        body: `<h2>From Build to Invoice</h2>
+<p>The professional finish: deploying to a custom domain, setting up client access, and packaging the handover. Plus: how to position a Lovable build to a client as a premium deliverable and price it accordingly.</p>`,
+        downloads: [
+          { label: '📁 Lovable Project Templates (ZIP)', href: '#' },
+          { label: '📄 Lovable Prompt Pack (PDF)', href: '#' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 8, title: 'Manus', icon: '',
+    lessons: [
+      {
+        id: 801, title: 'What autonomous agents are and when to use them', duration: '14 min',
+        video_url: '',
+        body: `<h2>The Next Level — Agents That Act</h2>
+<p>Every tool we've covered so far responds to a prompt. Manus is different: it takes a goal and works toward it autonomously — browsing the web, writing files, running tasks, and making decisions along the way. It's a fundamentally different kind of AI interaction.</p>
+<h3>When to use Manus</h3>
+<ul>
+  <li>Tasks that require multiple sequential steps</li>
+  <li>Research that spans many sources</li>
+  <li>Repetitive workflows you want to run on autopilot</li>
+  <li>Tasks where you want a complete output, not a draft</li>
+</ul>`,
+        downloads: []
+      },
+      {
+        id: 802, title: 'Manus in action — research, writing, and execution at scale', duration: '22 min',
+        video_url: '',
+        body: `<h2>Watching an Agent Work</h2>
+<p>In this lesson we watch Manus complete three real tasks: a competitor research report, a full content calendar with drafted posts, and an automated outreach sequence. Each one would normally take hours. With Manus, you start it and come back to the finished output.</p>`,
+        downloads: []
+      },
+      {
+        id: 803, title: 'Building your first agent workflow for a real business task', duration: '20 min',
+        video_url: '',
+        body: `<h2>Your First Agent</h2>
+<p>Pick a real task from your work — a recurring research job, a content process, a client report. In this lesson you'll set up a Manus workflow for it, run it, and review the output. By the end you'll have one automated process you didn't have before.</p>`,
+        downloads: [{ label: '📄 Agent Workflow Templates (PDF)', href: '#' }]
+      },
+    ]
+  },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  QUESTIONNAIRE HELPERS
+// ─────────────────────────────────────────────────────────────
+function selectRole(btn, value) {
+  document.querySelectorAll('#role-buttons button').forEach(b => {
+    b.style.borderColor = '#e2e8f0'; b.style.background = '#f8fafc'; b.style.color = '#0f172a';
+  });
+  btn.style.borderColor = '#18181b'; btn.style.background = '#18181b'; btn.style.color = 'white';
+  document.getElementById('q-role').value = value;
+}
+
+function selectHours(btn, value) {
+  document.querySelectorAll('#hours-buttons button').forEach(b => {
+    b.style.borderColor = '#e2e8f0'; b.style.background = '#f8fafc'; b.style.color = '#0f172a';
+  });
+  btn.style.borderColor = '#18181b'; btn.style.background = '#18181b'; btn.style.color = 'white';
+  document.getElementById('q-hours').value = value;
+}
+
+let selectedTools = [];
+function toggleTool(btn, value) {
+  if (selectedTools.includes(value)) {
+    selectedTools = selectedTools.filter(t => t !== value);
+    btn.style.borderColor = '#e2e8f0'; btn.style.background = '#f8fafc'; btn.style.color = '#0f172a';
+  } else {
+    selectedTools.push(value);
+    btn.style.borderColor = '#18181b'; btn.style.background = '#18181b'; btn.style.color = 'white';
+  }
+  document.getElementById('q-tools').value = selectedTools.join(',');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────
+let currentLessonId = 101;
+let completed = new Set(JSON.parse(localStorage.getItem('completed') || '[]'));
+let supabase;
+let flatLessons = [];
+
+// Load the correct Module 1 variant based on saved ai_level
+(function() {
+  const savedLevel = localStorage.getItem('ai_level') || 'beginner';
+  COURSE[0].lessons = MODULE1_VARIANTS[savedLevel] || MODULE1_VARIANTS.beginner;
+})();
+
+// Build flat list for prev/next navigation
+COURSE.forEach(m => m.lessons.forEach(l => flatLessons.push({ ...l, moduleTitle: m.title, moduleId: m.id })));
+
+// ─────────────────────────────────────────────────────────────
+//  AUTH CHECK
+// ─────────────────────────────────────────────────────────────
+async function initAuth() {
+  document.getElementById('auth-gate').style.display = 'none';
+  renderSidebar();
+  loadLesson(currentLessonId);
+}
+
+function signOut() {
+  window.location.href = 'index.html';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SIDEBAR
+// ─────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const nav = document.getElementById('module-nav');
+  nav.innerHTML = '';
+
+  COURSE.forEach((module, mi) => {
+    const completedCount = module.lessons.filter(l => completed.has(l.id)).length;
+    const isActive = module.lessons.some(l => l.id === currentLessonId);
+    const group = document.createElement('div');
+    group.className = 'module-group mb-1';
+    group.innerHTML = `
+      <button onclick="toggleModule(this)" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors text-left group">
+        <span class="text-base">${module.icon}</span>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Module ${module.id}</p>
+          <p class="text-sm font-semibold text-gray-800 truncate">${module.title}</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="text-xs text-gray-400">${completedCount}/${module.lessons.length}</span>
+          <svg class="module-chevron w-4 h-4 text-gray-300 transition-transform ${isActive ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </button>
+      <div class="lesson-list px-2 pb-1 space-y-0.5 ${isActive ? '' : 'hidden'}">
+        ${module.lessons.map(l => `
+          <button onclick="loadLesson(${l.id})" class="lesson-item w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left border border-transparent ${l.id === currentLessonId ? 'active' : ''}">
+            <span class="w-5 h-5 rounded-full flex-shrink-0 ${completed.has(l.id) ? 'bg-green-400' : 'border-2 border-gray-200'} flex items-center justify-center">
+              ${completed.has(l.id) ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
+            </span>
+            <div class="min-w-0 flex-1">
+              <p class="lesson-title text-xs text-gray-600 truncate">${l.title}</p>
+              <p class="text-xs text-gray-400">${l.duration}</p>
+            </div>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    nav.appendChild(group);
+  });
+
+  updateProgress();
+}
+
+function toggleModule(btn) {
+  const list = btn.nextElementSibling;
+  const icon = btn.querySelector('.module-chevron');
+  const isHidden = list.classList.contains('hidden');
+  list.classList.toggle('hidden', !isHidden);
+  icon.classList.toggle('rotate-180', isHidden);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  LESSON LOADER
+// ─────────────────────────────────────────────────────────────
+function loadLesson(lessonId) {
+  currentLessonId = lessonId;
+  const idx = flatLessons.findIndex(l => l.id === lessonId);
+  const lesson = flatLessons[idx];
+  if (!lesson) return;
+
+  // Update breadcrumb
+  document.getElementById('bc-module').textContent = `Module — ${lesson.moduleTitle}`;
+  document.getElementById('bc-lesson').textContent = lesson.title;
+  document.getElementById('lesson-title').textContent = lesson.title;
+  document.getElementById('lesson-meta').textContent = `${lesson.moduleTitle} · ${lesson.duration}`;
+
+  // Video
+  const videoSection = document.getElementById('video-section');
+  const videoPlaceholder = document.getElementById('video-placeholder');
+  const iframe = document.getElementById('video-iframe');
+  if (lesson.video_url) {
+    iframe.src = lesson.video_url;
+    videoSection.classList.remove('hidden');
+    videoPlaceholder.classList.add('hidden');
+  } else {
+    iframe.src = '';
+    videoSection.classList.add('hidden');
+    videoPlaceholder.classList.remove('hidden');
+  }
+
+  // Body
+  document.getElementById('lesson-body').innerHTML = lesson.body || '';
+
+  // Downloads
+  const dlSection = document.getElementById('downloads-section');
+  const dlList = document.getElementById('downloads-list');
+  if (lesson.downloads && lesson.downloads.length > 0) {
+    dlList.innerHTML = lesson.downloads.map(d => `
+      <a href="${d.href}" download class="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-100 transition-colors group">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#f4f4f5">
+          <svg class="w-4 h-4" style="color:#18181b" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">${d.label}</span>
+        <svg class="w-4 h-4 text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+      </a>
+    `).join('');
+    dlSection.classList.remove('hidden');
+  } else {
+    dlSection.classList.add('hidden');
+  }
+
+  // Complete button
+  const isComplete = completed.has(lessonId);
+  const completeBtn = document.getElementById('btn-complete');
+  const completeTxt = document.getElementById('btn-complete-text');
+  if (isComplete) {
+    completeBtn.className = 'flex items-center gap-2 text-sm font-semibold bg-green-100 text-green-700 px-5 py-2.5 rounded-xl hover:bg-green-200 transition';
+    completeBtn.style.background = '';
+    completeTxt.textContent = 'Completed ✓';
+  } else {
+    const isLast = idx === flatLessons.length - 1;
+    completeBtn.className = 'flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl hover:opacity-90 transition';
+    completeBtn.style.background = '#18181b';
+    completeTxt.textContent = isLast ? 'Mark complete' : 'Mark complete & continue';
+  }
+
+  // Nav buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').style.display = idx === flatLessons.length - 1 ? 'none' : '';
+
+  // Scroll to top
+  document.getElementById('main-content').scrollTop = 0;
+
+  // Show content
+  document.getElementById('content-loading').classList.add('hidden');
+  document.getElementById('lesson-view').classList.remove('hidden');
+
+  // Re-render sidebar to update active state
+  renderSidebar();
+
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.add('hidden');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  PROGRESS
+// ─────────────────────────────────────────────────────────────
+function markComplete() {
+  const idx = flatLessons.findIndex(l => l.id === currentLessonId);
+  completed.add(currentLessonId);
+  localStorage.setItem('completed', JSON.stringify([...completed]));
+  updateProgress();
+  // Auto-advance to next lesson
+  if (idx < flatLessons.length - 1) {
+    loadLesson(flatLessons[idx + 1].id);
+  } else {
+    renderSidebar(); // refresh sidebar checkmarks on last lesson
+  }
+}
+
+function navigateLesson(dir) {
+  const idx = flatLessons.findIndex(l => l.id === currentLessonId);
+  const next = flatLessons[idx + dir];
+  if (next) loadLesson(next.id);
+}
+
+function updateProgress() {
+  const pct = Math.round((completed.size / flatLessons.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = pct + '% complete';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  MOBILE SIDEBAR
+// ─────────────────────────────────────────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen  = sidebar.classList.contains('mobile-open');
+  sidebar.classList.toggle('mobile-open', !isOpen);
+  overlay.classList.toggle('hidden', isOpen);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  QUESTIONNAIRE
+// ─────────────────────────────────────────────────────────────
+let selectedLevel = '';
+
+function selectLevel(level) {
+  selectedLevel = level;
+  ['beginner','intermediate','advanced'].forEach(l => {
+    const btn = document.getElementById('level-' + l);
+    if (l === level) {
+      btn.style.borderColor = '#18181b';
+      btn.style.background = '#f4f4f5';
+    } else {
+      btn.style.borderColor = '#e2e8f0';
+      btn.style.background = '#f8fafc';
+    }
+  });
+}
+
+function analyzeAnswers(level, age, background, goal) {
+  const all = (age + ' ' + background + ' ' + goal).toLowerCase();
+  const ageNum = parseInt(age);
+  let message = '';
+
+  // Level track prefix
+  const levelLabels = { beginner: '🌱 Beginner track', intermediate: '⚡ Intermediate track', advanced: '🔥 Advanced track' };
+  const levelMessages = {
+    beginner: `<strong>${levelLabels.beginner}</strong> — Your Module 1 is built from scratch for you. No assumptions, no jargon. Everything is explained clearly and you'll have your first real output within the first session.<br/><br/>`,
+    intermediate: `<strong>${levelLabels.intermediate}</strong> — Your Module 1 skips the basics and focuses on filling gaps and levelling up your workflow. You'll start building properly from day one.<br/><br/>`,
+    advanced: `<strong>${levelLabels.advanced}</strong> — Your Module 1 is a fast recalibration, not a setup guide. We'll focus on the gap between "advanced user" and "power user" — and it's bigger than you think.<br/><br/>`,
+  };
+  const levelPrefix = levelMessages[level] || '';
+
+  // Detect persona
+  const isTeen = (ageNum >= 13 && ageNum <= 18) || all.match(/\b(1[3-8])\b|school|gcse|a.level|sixth form|year \d+/);
+  const isBusinessOwner = all.match(/my business|own business|run a business|business owner|i have a business|we have a business|our business|running a business|already have a business/);
+  const isEntrepreneur = !isBusinessOwner && all.match(/start a business|build a business|entrepreneur|founder|startup|my own thing|own company/);
+  const isFreelancer = all.match(/freelance|clients|earn|income|make money|side hustle|paid|charge|revenue|sell websites/);
+  const isCareer = all.match(/job|career|hire|employed|cv|portfolio|get into tech|work in tech|agency|junior dev/);
+  const isStudent = all.match(/student|college|university|uni|studying|degree|course|learning/);
+
+  if (isTeen) {
+    message = levelPrefix + `You're already ahead of 99% of people your age — most adults haven't even heard of the tools you're about to learn.<br/><br/>
+<strong>Start with Module 1</strong> (your personalised version), then work through <strong>Modules 2–5</strong> to learn the briefing framework and the core tools. Your first clients will most likely be local businesses, parents' contacts, or school friends — <strong>£150–£300 per site</strong> is completely realistic. By <strong>Module 7 (Lovable)</strong> you'll have the skills to build anything a small business needs.`;
+  } else if (isBusinessOwner) {
+    message = levelPrefix + `Since you already run a business, you don't need to learn how to find clients — you need to learn how to build better tools for the one you've got.<br/><br/>
+Focus on <strong>Modules 2 (Partnership)</strong>, <strong>5 (Claude Code)</strong>, and <strong>7 (Lovable)</strong> — these will teach you how to build or improve your own website, create landing pages for new products, and automate the parts of your business that currently take too much time. <strong>Module 6 (Cowork)</strong> is especially valuable for business owners — it'll save you 5–10 hours a week.`;
+  } else if (isEntrepreneur) {
+    message = levelPrefix + `Building a business with AI is exactly what this course is designed for.<br/><br/>
+<strong>Module 2</strong> gives you the Partnership framework. <strong>Modules 3 and 4</strong> (Gamma and Artifacts) let you build a polished landing page or prototype in hours. <strong>Module 7 (Lovable)</strong> is where you build the actual product — MVP in a weekend. <strong>Module 8 (Manus)</strong> can handle your research, outreach, and content on autopilot while you focus on building.`;
+  } else if (isFreelancer) {
+    message = levelPrefix + `The fastest path from this course to paid work: <strong>Module 2 → Module 5 → Module 7</strong>.<br/><br/>
+<strong>Weekend 1:</strong> Finish Modules 1–2. You understand the workflow.<br/>
+<strong>Weekend 2:</strong> Build a real site with Module 7 (Lovable). Take screenshots.<br/>
+<strong>Week 3:</strong> Start pitching. First paid project typically lands in week 3–4.<br/><br/>
+Don't wait until you feel "ready." Momentum beats perfection.`;
+  } else if (isCareer) {
+    message = levelPrefix + `AI web development is one of the most in-demand skills in the job market right now — and most candidates don't have it yet.<br/><br/>
+Work through <strong>Modules 1–5</strong> in order to build your technical foundation. <strong>Module 5 (Claude Code)</strong> is the one that shows in a portfolio. Then use the skills from <strong>Module 7 (Lovable)</strong> to build 2–3 deployed projects with case studies. That's the CV that gets interviews.`;
+  } else if (isStudent) {
+    message = levelPrefix + `You're ahead of the curve — most people your age have no idea these tools exist, and the ones who do aren't learning them seriously. You are.<br/><br/>
+Work through all 8 modules in order. You can do this in bursts — even 2 hours on a Sunday gets you through a module. By the time you finish, you'll have skills that most graduates don't have — and you can start earning with them immediately through freelance work or your own projects.`;
+  } else {
+    message = levelPrefix + `Here's the path we'd recommend:<br/><br/>
+Start with <strong>Module 1</strong>, then go straight into <strong>Module 2 (Partnership)</strong> — that's the framework that ties everything else together. Modules 3–8 teach you each tool in turn. Everything builds on itself, so don't skip ahead. By Module 5 you'll have built and deployed a real project. Lifetime access — no pressure to rush.`;
+  }
+
+  return { message };
+}
+
+function submitQuestionnaire() {
+  const goal = document.getElementById('q-goal').value.trim();
+  const outcome = document.getElementById('q-outcome').value.trim();
+  const worry = document.getElementById('q-worry').value.trim();
+  const prior = document.getElementById('q-prior').value.trim();
+  const role = document.getElementById('q-role').value;
+  const hours = document.getElementById('q-hours').value;
+
+  if (!selectedLevel || !goal || !outcome) {
+    document.getElementById('q-error').style.display = 'block';
+    document.getElementById('q-error').textContent = !selectedLevel
+      ? 'Please select your AI knowledge level to continue.'
+      : 'Please answer at least the first two questions to continue.';
+    return;
+  }
+
+  localStorage.setItem('ai_level', selectedLevel);
+  localStorage.setItem('q_goal', goal);
+  localStorage.setItem('q_outcome', outcome);
+  localStorage.setItem('q_worry', worry);
+  localStorage.setItem('q_prior', prior);
+  localStorage.setItem('q_role', role);
+  localStorage.setItem('q_hours', hours);
+  localStorage.setItem('q_tools', document.getElementById('q-tools').value);
+
+  const result = analyzeAnswers(selectedLevel, goal, role, outcome);
+  localStorage.setItem('quiz_done', 'true');
+  localStorage.setItem('quiz_message', result.message);
+
+  // Load the correct Module 1 variant into COURSE
+  COURSE[0].lessons = MODULE1_VARIANTS[selectedLevel] || MODULE1_VARIANTS.beginner;
+  flatLessons = [];
+  COURSE.forEach(m => m.lessons.forEach(l => flatLessons.push({ ...l, moduleTitle: m.title, moduleId: m.id })));
+
+  // Show result screen
+  document.getElementById('q-form').style.display = 'none';
+  document.getElementById('q-result').style.display = 'block';
+  document.getElementById('q-result-text').innerHTML = result.message;
+}
+
+function enterCourse() {
+  document.getElementById('questionnaire-overlay').style.display = 'none';
+}
+
+function retakeQuestionnaire() {
+  // Clear quiz state and reset form
+  localStorage.removeItem('quiz_done');
+  localStorage.removeItem('quiz_message');
+  localStorage.removeItem('ai_level');
+  selectedLevel = '';
+  document.getElementById('q-welcome').style.display = 'block';
+  document.getElementById('q-form').style.display = 'none';
+  document.getElementById('q-result').style.display = 'none';
+  document.getElementById('q-error').style.display = 'none';
+  document.getElementById('q-age').value = '';
+  document.getElementById('q-bg').value = '';
+  document.getElementById('q-goal').value = '';
+  ['beginner','intermediate','advanced'].forEach(l => {
+    const btn = document.getElementById('level-' + l);
+    btn.style.borderColor = '#e2e8f0';
+    btn.style.background = '#f8fafc';
+  });
+  document.getElementById('questionnaire-overlay').style.display = 'flex';
+}
+
+// Show questionnaire if not done yet
+if (!localStorage.getItem('quiz_done')) {
+  document.getElementById('questionnaire-overlay').style.display = 'flex';
+}
+
+// Show personalised banner if quiz was done
+const savedMsg = localStorage.getItem('quiz_message');
+if (savedMsg) {
+  const banner = document.getElementById('personalised-banner');
+  if (banner) {
+    banner.innerHTML = savedMsg.replace(/[\u{1F300}-\u{1FFFF}]|[\u{2600}-\u{27FF}]/gu, '').trim();
+    banner.style.display = 'block';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
+initAuth();
+
+// Force dark theme on all elements with inline white backgrounds
+(function darkOverride() {
+  const BG_WHITE = ['#fff','#ffffff','white','#f8fafc','#f4f4f5','#fafafa','#f9fafb','#fef2f2','#eff6ff','#eef2ff','#f0f9ff'];
+  const TEXT_DARK = ['#0f172a','#1e293b','#18181b','#111827','#374151'];
+
+  function applyDark(el) {
+    if (el.id === 'personalised-banner') return;
+    const s = el.style;
+    if (BG_WHITE.some(c => s.backgroundColor === c || s.background === c || s.background.includes(c))) {
+      s.backgroundColor = '#141414';
+      s.background = '#141414';
+    }
+    if (TEXT_DARK.some(c => s.color === c)) {
+      s.color = '#f2f2f2';
+    }
+    if (s.borderColor && (s.borderColor.includes('#e2e8f0') || s.borderColor.includes('#e4e4e7') || s.borderColor.includes('#d1d5db'))) {
+      s.borderColor = 'rgba(255,255,255,0.08)';
+    }
+  }
+
+  function sweep() {
+    document.querySelectorAll('*').forEach(applyDark);
+  }
+
+  sweep();
+  // Run again after dynamic content renders
+  setTimeout(sweep, 500);
+  setTimeout(sweep, 1500);
+
+  // Watch for DOM changes
+  new MutationObserver(sweep).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+</body>
+</html>
