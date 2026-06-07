@@ -36,14 +36,9 @@
       color: var(--white) !important;
     }
     #questionnaire-overlay button[type="button"] {
-      background: var(--bg-2) !important;
-      border-color: var(--border) !important;
-      color: var(--white) !important;
-    }
-    #questionnaire-overlay .q-option-selected {
-      background: var(--white) !important;
-      color: var(--bg) !important;
-      border-color: var(--white) !important;
+      background: #1a1a1a;
+      border-color: rgba(255,255,255,0.1);
+      color: #f2f2f2;
     }
 
     /* Nav */
@@ -61,12 +56,15 @@
     .lesson-item.active .lesson-title { color: var(--white) !important; }
     .module-title { color: var(--mid) !important; }
 
-    /* Main content */
-    .bg-gray-50 { background: var(--bg) !important; }
-    main, .flex-1 { background: var(--bg) !important; }
-    h1, h2, h3, h4, h5 { color: var(--white) !important; }
-    p, li, span { color: var(--dim) !important; }
-    strong { color: var(--white) !important; }
+    /* Main content — dark grey */
+    .bg-gray-50 { background: #1a1a1a !important; }
+    main { background: #1a1a1a !important; }
+    main h1, main h2, main h3, main h4, main h5 { color: #f2f2f2 !important; }
+    main p, main li, main span { color: rgba(242,242,242,0.55) !important; }
+    main strong { color: #f2f2f2 !important; }
+    /* Keep nav and sidebar dark */
+    nav { background: var(--bg-1) !important; }
+    aside { background: var(--bg) !important; }
 
     /* Progress bar */
     .bg-gray-200 { background: var(--bg-2) !important; }
@@ -135,8 +133,8 @@
 
     <!-- Form -->
     <div id="q-form" style="display:none">
-      <h1 style="color:#0f172a;font-size:32px;font-weight:800;line-height:1.15;margin-bottom:8px">Let's personalise<br/>your course</h1>
-      <p style="color:#64748b;font-size:15px;margin-bottom:40px">8 quick questions. Takes under 2 minutes. We use your answers to tailor everything.</p>
+      <h1 style="color:#f2f2f2;font-size:32px;font-weight:700;line-height:1.1;margin-bottom:8px;letter-spacing:-0.02em;">Let's personalise<br/>your course</h1>
+      <p style="color:rgba(242,242,242,0.4);font-size:15px;margin-bottom:40px">8 quick questions. Takes under 2 minutes.</p>
 
       <div id="q-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:20px">Please answer all questions to continue.</div>
 
@@ -149,36 +147,32 @@
 
       <!-- Q2: AI Level -->
       <div style="margin-bottom:32px">
-        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">How would you rate your AI knowledge? (1–5)</label>
-        <p style="color:#94a3b8;font-size:12px;margin-bottom:14px">1 = heard the term, 5 = I've built something with it. Determines your Module 1.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button type="button" id="level-beginner" onclick="selectLevel('beginner')" style="flex:1;min-width:80px;padding:12px 8px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s">
-            <div style="font-weight:700;font-size:18px;color:#0f172a">1–2</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Beginner</div>
+        <label style="display:block;color:#f2f2f2;font-weight:600;font-size:15px;margin-bottom:4px">How would you rate your AI knowledge?</label>
+        <p style="color:rgba(242,242,242,0.4);font-size:12px;margin-bottom:14px">1 = I've heard the term. 5 = I've built something with it.</p>
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="level-1" onclick="selectLevel('beginner',this)" style="flex:1;padding:14px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:#1a1a1a;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s;color:#f2f2f2;">
+            <div style="font-weight:700;font-size:20px;">1</div>
           </button>
-          <button type="button" id="level-intermediate" onclick="selectLevel('intermediate')" style="flex:1;min-width:80px;padding:12px 8px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s">
-            <div style="font-weight:700;font-size:18px;color:#0f172a">3</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Some experience</div>
+          <button type="button" id="level-2" onclick="selectLevel('beginner',this)" style="flex:1;padding:14px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:#1a1a1a;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s;color:#f2f2f2;">
+            <div style="font-weight:700;font-size:20px;">2</div>
           </button>
-          <button type="button" id="level-advanced" onclick="selectLevel('advanced')" style="flex:1;min-width:80px;padding:12px 8px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s">
-            <div style="font-weight:700;font-size:18px;color:#0f172a">4–5</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Advanced</div>
+          <button type="button" id="level-3" onclick="selectLevel('intermediate',this)" style="flex:1;padding:14px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:#1a1a1a;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s;color:#f2f2f2;">
+            <div style="font-weight:700;font-size:20px;">3</div>
+          </button>
+          <button type="button" id="level-4" onclick="selectLevel('advanced',this)" style="flex:1;padding:14px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:#1a1a1a;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s;color:#f2f2f2;">
+            <div style="font-weight:700;font-size:20px;">4</div>
+          </button>
+          <button type="button" id="level-5" onclick="selectLevel('advanced',this)" style="flex:1;padding:14px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:#1a1a1a;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.15s;color:#f2f2f2;">
+            <div style="font-weight:700;font-size:20px;">5</div>
           </button>
         </div>
       </div>
 
       <!-- Q3: Day to day -->
       <div style="margin-bottom:28px">
-        <label style="display:block;color:#0f172a;font-weight:700;font-size:15px;margin-bottom:4px">What do you do day-to-day?</label>
-        <p style="color:#94a3b8;font-size:12px;margin-bottom:10px">Determines which real-world examples we use to explain things.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="role-buttons">
-          <button type="button" onclick="selectRole(this,'student')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Student</button>
-          <button type="button" onclick="selectRole(this,'freelancer')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Freelancer</button>
-          <button type="button" onclick="selectRole(this,'employed')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Employed</button>
-          <button type="button" onclick="selectRole(this,'building')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Building something</button>
-          <button type="button" onclick="selectRole(this,'other')" style="padding:10px 16px;border:2px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#0f172a;transition:all 0.15s">Other</button>
-        </div>
-        <input type="hidden" id="q-role" value=""/>
+        <label style="display:block;color:#f2f2f2;font-weight:600;font-size:15px;margin-bottom:4px">What do you do day-to-day?</label>
+        <p style="color:rgba(242,242,242,0.4);font-size:12px;margin-bottom:10px">Helps us use examples that actually make sense for you.</p>
+        <textarea id="q-role" placeholder="e.g. I'm a student in sixth form, I freelance as a designer, I work in marketing, I'm building a business..." rows="2" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f2f2f2;padding:14px 16px;border-radius:8px;font-size:14px;outline:none;resize:none;font-family:'Inter Tight',sans-serif;" onfocus="this.style.borderColor='rgba(255,255,255,0.3)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
       </div>
 
       <!-- Q4: Specific outcome -->
@@ -331,7 +325,7 @@
       </div>
 
       <!-- Personalised banner -->
-      <div id="personalised-banner" style="display:none;background:#f2f2f2;border-radius:12px;padding:20px 24px;margin-bottom:28px;color:#0D0D0D;font-size:13px;line-height:1.8;font-family:'Inter Tight',sans-serif;"></div>
+      <div id="personalised-banner" style="display:none;background:#242424;border-radius:12px;padding:20px 24px;margin-bottom:28px;color:rgba(242,242,242,0.7);font-size:13px;line-height:1.8;font-family:'Inter Tight',sans-serif;border:1px solid rgba(255,255,255,0.07);"></div>
 
       <!-- Lesson header -->
       <h1 id="lesson-title" class="text-2xl md:text-3xl font-bold text-gray-900 mb-2"></h1>
@@ -866,7 +860,7 @@ async function initAuth() {
 }
 
 function signOut() {
-  window.location.href = 'index.html';
+  window.location.href = 'sales.html';
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1055,18 +1049,20 @@ function toggleSidebar() {
 // ─────────────────────────────────────────────────────────────
 let selectedLevel = '';
 
-function selectLevel(level) {
+function selectLevel(level, clickedBtn) {
   selectedLevel = level;
-  ['beginner','intermediate','advanced'].forEach(l => {
-    const btn = document.getElementById('level-' + l);
-    if (l === level) {
-      btn.style.borderColor = '#18181b';
-      btn.style.background = '#f4f4f5';
-    } else {
-      btn.style.borderColor = '#e2e8f0';
-      btn.style.background = '#f8fafc';
-    }
+  [1,2,3,4,5].forEach(n => {
+    const btn = document.getElementById('level-' + n);
+    if (!btn) return;
+    btn.style.borderColor = 'rgba(255,255,255,0.1)';
+    btn.style.background = '#1a1a1a';
+    btn.style.color = '#f2f2f2';
   });
+  if (clickedBtn) {
+    clickedBtn.style.borderColor = '#f2f2f2';
+    clickedBtn.style.background = '#f2f2f2';
+    clickedBtn.style.color = '#0D0D0D';
+  }
 }
 
 function analyzeAnswers(level, age, background, goal) {
@@ -1165,23 +1161,32 @@ function enterCourse() {
 }
 
 function retakeQuestionnaire() {
-  // Clear quiz state and reset form
   localStorage.removeItem('quiz_done');
   localStorage.removeItem('quiz_message');
   localStorage.removeItem('ai_level');
   selectedLevel = '';
+
+  // Reset visible screens
   document.getElementById('q-welcome').style.display = 'block';
   document.getElementById('q-form').style.display = 'none';
   document.getElementById('q-result').style.display = 'none';
   document.getElementById('q-error').style.display = 'none';
-  document.getElementById('q-age').value = '';
-  document.getElementById('q-bg').value = '';
-  document.getElementById('q-goal').value = '';
-  ['beginner','intermediate','advanced'].forEach(l => {
-    const btn = document.getElementById('level-' + l);
-    btn.style.borderColor = '#e2e8f0';
-    btn.style.background = '#f8fafc';
+
+  // Reset text inputs
+  ['q-goal','q-outcome','q-worry','q-prior','q-role'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
   });
+
+  // Reset level buttons
+  [1,2,3,4,5].forEach(n => {
+    const btn = document.getElementById('level-' + n);
+    if (!btn) return;
+    btn.style.borderColor = 'rgba(255,255,255,0.1)';
+    btn.style.background = '#1a1a1a';
+    btn.style.color = '#f2f2f2';
+  });
+
   document.getElementById('questionnaire-overlay').style.display = 'flex';
 }
 
@@ -1212,6 +1217,8 @@ initAuth();
 
   function applyDark(el) {
     if (el.id === 'personalised-banner') return;
+    if (el.closest('main')) return;
+    if (el.closest('#questionnaire-overlay')) return;
     const s = el.style;
     if (BG_WHITE.some(c => s.backgroundColor === c || s.background === c || s.background.includes(c))) {
       s.backgroundColor = '#141414';
@@ -1230,12 +1237,7 @@ initAuth();
   }
 
   sweep();
-  // Run again after dynamic content renders
-  setTimeout(sweep, 500);
-  setTimeout(sweep, 1500);
-
-  // Watch for DOM changes
-  new MutationObserver(sweep).observe(document.body, { childList: true, subtree: true });
+  setTimeout(sweep, 800);
 })();
 </script>
 </body>
